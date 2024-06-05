@@ -1,0 +1,58 @@
+POST http://localhost:8080/api/students
+Content-Type: application/json
+Accept: application/json
+
+{
+  "aisId": 70127,
+  "name": "Milan Mladoniczky",
+  "email": "milan@stuba.sk",
+  "password": "cGFzc3dvcmQ=",
+  "year": 8,
+  "term": 18,
+  "programme": "API"
+}
+
+> {%
+	client.test("Response should have id", function () {
+		client.assert(response.status === 200 || response.status === 201, "Response status is not acceptable");
+		client.assert(!!response.body.id, "Response does not have an id");
+	});
+	client.global.set("studentId", response.body.id)
+%}
+
+###
+GET http://localhost:8080/api/students/{{studentId}}
+Accept: application/json
+Authorization: Basic bWlsYW5Ac3R1YmEuc2s6cGFzc3dvcmQ=
+
+> {%
+	client.test("Response should have matched ids", function () {
+		client.assert(response.status === 200, "Response status is not acceptable");
+		client.assert(response.body.id == client.global.get("studentId"), "Response id does not match with saved id");
+	});
+%}
+
+###
+GET http://localhost:8080/api/students
+Accept: application/json
+Authorization: Basic bWlsYW5Ac3R1YmEuc2s6cGFzc3dvcmQ=
+
+> {%
+	client.test("Response should have one student", function () {
+		client.assert(response.status === 200, "Response status is not acceptable");
+		client.assert(response.body.length === 1, "Response has not only on student");
+		client.assert(response.body[0].id == client.global.get("studentId"), "Response id does not match with saved id");
+	});
+%}
+
+###
+DELETE http://localhost:8080/api/students/{{studentId}}
+Accept: application/json
+Authorization: Basic bWlsYW5Ac3R1YmEuc2s6cGFzc3dvcmQ=
+
+> {%
+	client.test("Response should have matched ids", function () {
+		client.assert(response.status === 200, "Response status is not acceptable");
+		client.assert(response.body.id == client.global.get("studentId"), "Response id does not match with saved id");
+	});
+%}
